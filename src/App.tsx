@@ -13,9 +13,7 @@ function App() {
 
   const { data: initialTasks = [] } = useQuery<Task[]>('tasks', getTasks, {
     onSuccess: (data) => {
-      if (localTasks.length === 0) {
-        setLocalTasks(data);
-      }
+      setLocalTasks(data);
     }
   });
 
@@ -24,7 +22,7 @@ function App() {
     {
       onMutate: async (newTask) => {
         const task = { ...newTask, id: Date.now() };
-        setLocalTasks(prev => [...prev, task]);
+        setLocalTasks(prev => Array.isArray(prev) ? [...prev, task] : [task]);
       }
     }
   );
@@ -33,7 +31,7 @@ function App() {
     deleteTask,
     {
       onMutate: async (deletedId) => {
-        setLocalTasks(prev => prev.filter(task => task.id !== deletedId));
+        setLocalTasks(prev => Array.isArray(prev) ? prev.filter(task => task.id !== deletedId) : []);
       }
     }
   );
@@ -43,9 +41,9 @@ function App() {
     {
       onMutate: async (updatedTask) => {
         setLocalTasks(prev => 
-          prev.map(task => 
+          Array.isArray(prev) ? prev.map(task => 
             task.id === updatedTask.id ? updatedTask : task
-          )
+          ) : []
         );
         setEditingId(null);
       }
